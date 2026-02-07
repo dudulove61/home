@@ -43,7 +43,7 @@ const mode = ref("movie");
 const currentUrl = computed(() => {
   return mode.value === "movie" 
     ? "https://tv.uke.cc/"  // 电影站
-    : "https://www.tiktok.com/"; // douyin
+    : "https://www.kuaishou.com/new-reco/"; // 快手
 });
 
 const close = () => {
@@ -109,3 +109,4 @@ const close = () => {
 .fade-enter-from, .fade-leave-to { opacity: 0; }
 
 </style>
+
