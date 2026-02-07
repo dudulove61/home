@@ -2,7 +2,7 @@ import { h } from "vue";
 import { SpaCandle } from "@icon-park/vue-next";
 import dayjs from "dayjs";
 
-// 时钟
+// 时钟：获取当前详细时间
 export const getCurrentTime = () => {
   let time = new Date();
   let year = time.getFullYear();
@@ -24,7 +24,7 @@ export const getCurrentTime = () => {
   return currentTime;
 };
 
-// 时光胶囊
+// 时光胶囊：计算日、周、月、年进度
 export const getTimeCapsule = () => {
   const now = dayjs();
   const dayText = {
@@ -33,25 +33,22 @@ export const getTimeCapsule = () => {
     month: "本月",
     year: "本年",
   };
+
   /**
    * 计算时间差的函数
-   * @param {String} unit 时间单位，可以是 'day', 'week', 'month', 'year'
+   * @param {String} unit 时间单位
    */
   const getDifference = (unit) => {
-    // 获取当前时间单位的开始时间
     const start = now.startOf(unit);
-    // 获取当前时间单位的结束时间
     const end = now.endOf(unit);
-    // 计算总的天数或小时数
     const total = end.diff(start, unit === "day" ? "hour" : "day") + 1;
-    // 计算已经过去的天数或小时数
     let passed = now.diff(start, unit === "day" ? "hour" : "day");
     if (unit === "week") {
       passed = (passed + 6) % 7;
     }
     const remaining = total - passed;
     const percentage = (passed / total) * 100;
-    // 返回数据
+    
     return {
       name: dayText[unit],
       total: total,
@@ -60,6 +57,7 @@ export const getTimeCapsule = () => {
       percentage: percentage.toFixed(2),
     };
   };
+
   return {
     day: getDifference("day"),
     week: getDifference("week"),
@@ -68,7 +66,46 @@ export const getTimeCapsule = () => {
   };
 };
 
-// 欢迎提示
+/**
+ * 新增功能：获取农历新年（春节）倒计时
+ * 预设了 2025-2030 年的春节日期
+ */
+export const getLunarYearCountdown = () => {
+  const now = dayjs();
+  const currentYear = now.year();
+
+  // 历年春节日期（正月初一）
+  const springFestivalDates = {
+    2025: "2025-01-29",
+    2026: "2026-02-17",
+    2027: "2027-02-06",
+    2028: "2028-01-26",
+    2029: "2029-02-13",
+    2030: "2030-02-03",
+  };
+
+  // 获取当年的春节目标日期
+  let targetDate = dayjs(springFestivalDates[currentYear]);
+
+  // 如果今年的春节已经过去，则自动指向明年
+  if (now.isAfter(targetDate)) {
+    targetDate = dayjs(springFestivalDates[currentYear + 1]);
+  }
+
+  const days = targetDate.diff(now, "day");
+  
+  // 进度计算（按一年约 365 天估算）
+  const percentage = ((365 - days) / 365) * 100;
+
+  return {
+    name: "春节",
+    year: targetDate.year(),
+    remaining: days,
+    percentage: Math.max(0, Math.min(100, percentage)).toFixed(2),
+  };
+};
+
+// 欢迎提示：根据小时段返回问候语
 export const helloInit = () => {
   const hour = new Date().getHours();
   let hello = null;
@@ -89,20 +126,22 @@ export const helloInit = () => {
   } else {
     hello = "夜深了";
   }
+  // 假设项目已全局引入 Element Plus 的 ElMessage
   ElMessage({
     dangerouslyUseHTMLString: true,
     message: `<strong>${hello}</strong> 欢迎来到我的主页`,
   });
 };
 
-// 默哀模式
+// 默哀模式检查
 const anniversaries = {
-  4.4: "清明节",
-  5.12: "汶川大地震纪念日",
-  7.7: "中国人民抗日战争纪念日",
-  9.18: "九·一八事变纪念日",
-  12.13: "南京大屠杀死难者国家公祭日",
+  "4.4": "清明节",
+  "5.12": "汶川大地震纪念日",
+  "7.7": "中国人民抗日战争纪念日",
+  "9.18": "九·一八事变纪念日",
+  "12.13": "南京大屠杀死难者国家公祭日",
 };
+
 export const checkDays = () => {
   const myDate = new Date();
   const mon = myDate.getMonth() + 1;
@@ -121,14 +160,13 @@ export const checkDays = () => {
   }
 };
 
-// 建站日期统计
+// 建站日期统计：计算运行的具体年月日
 export const siteDateStatistics = (startDate) => {
   const currentDate = new Date();
   let years = currentDate.getFullYear() - startDate.getFullYear();
   let months = currentDate.getMonth() - startDate.getMonth();
   let days = currentDate.getDate() - startDate.getDate();
 
-  // 如果天数或月份为负数，则调整天数和月份
   if (days < 0) {
     months--;
     const lastMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 0);
