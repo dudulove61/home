@@ -1,14 +1,12 @@
 <template>
-  <div v-if="siteLinks[0]" class="links">
+  <div v-if="siteLinks && siteLinks.length > 0" class="links">
     <div class="line">
       <Icon size="20">
         <Link />
       </Icon>
       <span class="title">网站列表</span>
     </div>
-    <!-- 网站列表 -->
     <Swiper
-      v-if="siteLinks[0]"
       :modules="[Pagination, Mousewheel]"
       :slides-per-view="1"
       :space-between="40"
@@ -19,9 +17,9 @@
       }"
       :mousewheel="true"
     >
-      <SwiperSlide v-for="site in siteLinksList" :key="site">
+      <SwiperSlide v-for="(site, pageIndex) in siteLinksList" :key="pageIndex">
         <el-row class="link-all" :gutter="20">
-          <el-col v-for="(item, index) in site" :span="8" :key="item">
+          <el-col v-for="(item, index) in site" :span="8" :key="item.link">
             <div
               class="item cards"
               :style="index < 3 ? 'margin-bottom: 20px' : null"
@@ -41,9 +39,21 @@
 </template>
 
 <script setup>
+import { computed, onMounted } from "vue";
 import { Icon } from "@vicons/utils";
-// 可前往 https://www.xicons.org 自行挑选并在此处引入
-import { Link, Blog, CompactDisc, Cloud, Compass, Book, Fire, LaptopCode } from "@vicons/fa"; // 注意使用正确的类别
+// 从 Font Awesome 类别中引入
+import { 
+  Link, 
+  Blog, 
+  CompactDisc, 
+  Cloud, 
+  Compass, 
+  Book, 
+  Fire, 
+  LaptopCode,
+  Tv as LiveTvFilled, // 将 Fa 中的 Tv 映射为 LiveTvFilled
+  Telegram 
+} from "@vicons/fa";
 import { mainStore } from "@/store";
 import { Swiper, SwiperSlide } from "swiper/vue";
 import { Pagination, Mousewheel } from "swiper/modules";
@@ -51,9 +61,10 @@ import siteLinks from "@/assets/siteLinks.json";
 
 const store = mainStore();
 
-// 计算网站链接
+// 计算网站链接：每页显示 6 个
 const siteLinksList = computed(() => {
   const result = [];
+  if (!siteLinks) return result;
   for (let i = 0; i < siteLinks.length; i += 6) {
     const subArr = siteLinks.slice(i, i + 6);
     result.push(subArr);
@@ -61,7 +72,7 @@ const siteLinksList = computed(() => {
   return result;
 });
 
-// 网站链接图标
+// 网站链接图标映射（需与 JSON 中的 icon 字段对应）
 const siteIcon = {
   Blog,
   Cloud,
@@ -71,9 +82,10 @@ const siteIcon = {
   Book,
   Fire,
   LaptopCode,
+  Telegram
 };
 
-// 链接跳转
+// 链接跳转逻辑
 const jumpLink = (data) => {
   if (data.name === "音乐" && store.musicClick) {
     if (typeof $openList === "function") $openList();
@@ -83,7 +95,7 @@ const jumpLink = (data) => {
 };
 
 onMounted(() => {
-  console.log(siteLinks);
+  console.log("站点链接已加载:", siteLinks);
 });
 </script>
 
@@ -142,7 +154,9 @@ onMounted(() => {
       flex-direction: row;
       justify-content: center;
       padding: 0 10px;
+      border-radius: 8px;
       animation: fade 0.5s;
+      cursor: pointer;
 
       &:hover {
         transform: scale(1.02);
@@ -179,5 +193,11 @@ onMounted(() => {
       height: 180px;
     }
   }
+}
+
+/* 简单的淡入动画 */
+@keyframes fade {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 </style>
