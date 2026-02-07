@@ -42,7 +42,7 @@ const mode = ref("movie");
 // 这里填入你想看的地址
 const currentUrl = computed(() => {
   return mode.value === "movie" 
-    ? "https://www.nbyy.cc/"  // 电影站
+    ? "https://tv.uke.cc/"  // 电影站
     : "https://www.tiktok.com/"; // douyin
 });
 
@@ -107,4 +107,5 @@ const close = () => {
 
 .fade-enter-active, .fade-leave-active { transition: opacity 0.3s; }
 .fade-enter-from, .fade-leave-to { opacity: 0; }
+
 </style>
