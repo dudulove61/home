@@ -4,6 +4,7 @@
   
   <Transition name="fade" mode="out-in">
     <main id="main" v-if="store.imgLoadStatus">
+      
       <div 
         class="mobile-media-btn" 
         v-show="!showMediaModal && !store.backgroundShow" 
@@ -77,10 +78,6 @@ onMounted(() => {
   cursorInit();
   getWidth();
   window.addEventListener("resize", getWidth);
-  document.oncontextmenu = () => {
-    ElMessage({ message: "为了浏览体验，本站禁用右键", grouping: true, duration: 2000 });
-    return false;
-  };
 });
 
 onBeforeUnmount(() => {
@@ -89,25 +86,34 @@ onBeforeUnmount(() => {
 </script>
 
 <style lang="scss" scoped>
-/* 移动端入口按钮 - 严格限制在 721px 以下 */
+/* 核心隔离样式：确保 PC 端完全不可见且不占位 */
 .mobile-media-btn {
-  display: none;
+  display: none; 
+
   @media (max-width: 721px) {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    position: fixed; /* 悬浮定位 */
+    position: fixed; /* 必须是 fixed，脱离文档流，不干扰 .all 的居中 */
     top: 20px;
     left: 20px;
-    z-index: 100;
+    z-index: 99;
     padding: 8px;
     background: rgba(0, 0, 0, 0.2);
     backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 12px;
-    .text { color: #fff; font-size: 10px; margin-top: 4px; }
-    &:active { transform: scale(0.95); }
+    cursor: pointer;
+
+    .text {
+      color: #fff;
+      font-size: 10px;
+      margin-top: 4px;
+    }
+    &:active {
+      transform: scale(0.95);
+    }
   }
 }
 
@@ -118,23 +124,35 @@ onBeforeUnmount(() => {
   transition: transform 0.3s;
   animation: fade-blur-main-in 0.65s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
   animation-delay: 0.5s;
+  
   .container {
-    width: 100%; height: 100vh;
-    margin: 0 auto; padding: 0 0.5vw;
+    width: 100%;
+    height: 100vh;
+    margin: 0 auto;
+    padding: 0 0.5vw;
     .all {
-      width: 100%; height: 100%;
+      width: 100%;
+      height: 100%;
       padding: 0 0.75rem;
-      display: flex; flex-direction: row;
-      justify-content: center; align-items: center;
-    }
-    .more {
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background-color: #00000080; backdrop-filter: blur(20px);
-      z-index: 2; animation: fade 0.5s;
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+      align-items: center;
     }
   }
+
   .menu {
-    position: absolute; display: flex; justify-content: center; align-items: center;
-    top: 84%; left: calc(50% - 28px); width: 56px; height: 34px;
-    background: rgb(0 0 0 / 20%); backdrop-filter: blur(10px); border-radius: 6px;
-    @media (min-width: 721px) { display: none;
+    position: absolute;
+    top: 84%;
+    left: calc(50% - 28px);
+    width: 56px;
+    height: 34px;
+    background: rgb(0 0 0 / 20%);
+    backdrop-filter: blur(10px);
+    border-radius: 6px;
+    @media (min-width: 721px) {
+      display: none;
+    }
+  }
+}
+</style>
