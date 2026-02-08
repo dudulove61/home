@@ -2,7 +2,7 @@
   <div class="more-content">
     <div class="media-card" @click="showModal = true">
       <video-two theme="two-tone" size="28" :fill="['#efefef', '#ff4d4f']" />
-      <span class="text">影音中心</span>
+      <span class="text">美女小姐姐</span>
     </div>
 
     <MediaModal v-model:visible="showModal" />
