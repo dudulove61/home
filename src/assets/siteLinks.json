@@ -4,15 +4,20 @@
     "name": "Tox源码网",
     "link": "https://tox.wang/"
   },
+    {
+    "icon": "Compass",
+    "name": "Tox导航站",
+    "link": "https://nav.tox.wang/"
+  },
   {
     "icon": "LiveTvFilled",
     "name": "UKE-TV",
     "link": "https://tv.uke.cc/"
   },
-  {
-    "icon": "Compass",
-    "name": "Tox导航站",
-    "link": "https://nav.tox.wang/"
+    {
+    "icon": "Music",
+    "name": "Cyber DJ",
+    "link": "https://dj.uke.cc/"
   },
   {
     "icon": "Fire",
