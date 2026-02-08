@@ -3,10 +3,9 @@
     <div v-if="visible" class="modal-mask" @click.self="closeModal">
       <div class="modal-container" @wheel.prevent="handleWheel">
         <div class="modal-header">
-          <span>影音中心 (点击视频或滚动切换)</span>
+          <span>影音中心</span>
           <close-one class="close-icon" @click="closeModal" />
         </div>
-        
         <div class="modal-body">
           <video 
             ref="videoPlayer"
@@ -18,11 +17,9 @@
             @click="refreshVideo"
             @error="handleError"
           ></video>
-          
           <div class="btn-group">
             <el-button type="primary" round @click.stop="refreshVideo">换一个</el-button>
           </div>
-          <div class="tips">PC滚轮下划 | 移动端点击视频切换</div>
         </div>
       </div>
     </div>
@@ -41,15 +38,13 @@ const videoUrl = ref("");
 const isThrottled = ref(false);
 const apiUrl = "https://api.yujn.cn/api/zzxjj.php?type=video";
 
-// 刷新视频源
 const refreshVideo = () => {
   videoUrl.value = ""; 
   setTimeout(() => {
     videoUrl.value = `${apiUrl}&t=${new Date().getTime()}`;
-  }, 60);
+  }, 50);
 };
 
-// PC滚轮逻辑
 const handleWheel = (event) => {
   if (event.deltaY > 0 && !isThrottled.value) {
     isThrottled.value = true;
@@ -59,7 +54,7 @@ const handleWheel = (event) => {
 };
 
 const handleError = () => {
-  ElMessage.error("视频加载失败，尝试自动切换");
+  ElMessage.error("视频加载失败，自动换一个");
   refreshVideo();
 };
 
@@ -74,48 +69,60 @@ watch(() => props.visible, (val) => {
 </script>
 
 <style lang="scss" scoped>
+/* 严格作用域样式 */
 .modal-mask {
   position: fixed;
-  top: 0; left: 0; width: 100%; height: 100%;
-  background: rgba(0, 0, 0, 0.9);
+  top: 0; left: 0; width: 100vw; height: 100vh;
+  background: rgba(0, 0, 0, 0.85);
   display: flex; align-items: center; justify-content: center;
-  z-index: 1000; backdrop-filter: blur(15px);
+  z-index: 2000; backdrop-filter: blur(10px);
 }
 
 .modal-container {
-  width: 95%; max-width: 500px; height: 85vh;
-  background: #000; border-radius: 20px;
+  /* PC端默认样式：优雅小弹窗 */
+  width: 90%; 
+  max-width: 450px; 
+  height: 80vh;
+  background: #000;
+  border-radius: 16px;
   border: 1px solid rgba(255, 255, 255, 0.1);
-  overflow: hidden; display: flex; flex-direction: column;
-  box-shadow: 0 10px 50px rgba(0,0,0,0.8);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
 
-  /* 移动端全屏覆盖逻辑 */
+  /* 移动端逻辑：100% 满屏 */
   @media (max-width: 721px) {
-    width: 100vw; height: 100vh; max-width: none; border-radius: 0; border: none;
+    width: 100vw;
+    height: 100vh;
+    max-width: none;
+    border-radius: 0;
+    border: none;
   }
 }
 
 .modal-header {
-  padding: 12px 20px; display: flex; justify-content: space-between;
-  align-items: center; color: #777; font-size: 12px;
-  background: rgba(255,255,255,0.03); z-index: 10;
-  .close-icon { cursor: pointer; font-size: 20px; &:hover { color: #ff4d4f; } }
+  padding: 10px 15px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #111;
+  color: #888;
+  font-size: 12px;
+  .close-icon { cursor: pointer; &:hover { color: #ff4d4f; } }
 }
 
 .modal-body {
-  flex: 1; position: relative; display: flex;
-  flex-direction: column; align-items: center; justify-content: center;
+  flex: 1;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   background: #000;
-
-  .video-content {
-    width: 100%; height: 100%; 
-    object-fit: contain; // 保持比例，避免拉伸变形
-  }
-
-  .btn-group { position: absolute; bottom: 60px; z-index: 11; opacity: 0.8; }
-  .tips { position: absolute; bottom: 25px; font-size: 10px; color: rgba(255,255,255,0.3); z-index: 11; }
+  .video-content { width: 100%; height: 100%; object-fit: contain; }
+  .btn-group { position: absolute; bottom: 40px; }
 }
 
-.fade-enter-active, .fade-leave-active { transition: all 0.3s ease-out; }
-.fade-enter-from, .fade-leave-to { opacity: 0; transform: scale(0.95); }
+.fade-enter-active, .fade-leave-active { transition: opacity 0.3s ease; }
+.fade-enter-from, .fade-leave-to { opacity: 0; }
 </style>
