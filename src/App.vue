@@ -49,7 +49,6 @@ import { helloInit, checkDays } from "@/utils/getTime.js";
 import { HamburgerButton, CloseSmall, VideoTwo } from "@icon-park/vue-next";
 import { mainStore } from "@/store";
 import { Icon } from "@vicons/utils";
-import { ElMessage } from "element-plus";
 import Loading from "@/components/Loading.vue";
 import MainLeft from "@/views/Main/Left.vue";
 import MainRight from "@/views/Main/Right.vue";
@@ -85,13 +84,14 @@ onBeforeUnmount(() => {
 </script>
 
 <style lang="scss" scoped>
+/* 按钮样式：确保它在 PC 端不会被渲染或计算 */
 .mobile-media-btn {
-  display: none; 
+  display: none;
   @media (max-width: 721px) {
     display: flex;
     flex-direction: column;
     align-items: center;
-    position: fixed;
+    position: fixed; /* 核心：fixed 定位不占主容器位 */
     top: 20px;
     left: 20px;
     z-index: 99;
@@ -111,17 +111,23 @@ onBeforeUnmount(() => {
   transition: transform 0.3s;
   
   .container {
-    width: 100%; height: 100vh;
+    width: 100%;
+    height: 100vh;
     .all {
-      width: 100%; height: 100%;
-      display: flex; justify-content: center; align-items: center;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
     }
   }
 
   .menu {
     position: absolute;
-    top: 84%; left: calc(50% - 28px);
-    width: 56px; height: 34px;
+    top: 84%;
+    left: calc(50% - 28px);
+    width: 56px;
+    height: 34px;
     background: rgb(0 0 0 / 20%);
     backdrop-filter: blur(10px);
     border-radius: 6px;
