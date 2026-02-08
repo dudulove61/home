@@ -1,122 +1,118 @@
 <template>
-  <div class="mobile-only-wrapper" v-if="isMobile">
-    <div 
-      class="m-media-btn" 
-      v-show="!showModal" 
-      @click="showModal = true"
-    >
-      <video-two theme="filled" size="24" fill="#ffffff" />
-      <span class="text">影音中心</span>
-    </div>
-
-    <Teleport to="body">
-      <Transition name="m-fade">
-        <div v-if="showModal" class="m-modal-mask">
-          <div class="m-modal-container">
-            <div class="m-header">
-              <span>影音中心</span>
-              <close-one class="m-close" @click="closeModal" />
-            </div>
-            <div class="m-content">
-              <video 
-                autoplay 
-                controls 
-                class="m-video"
-                :src="videoUrl"
-                @ended="refreshVideo"
-              ></video>
-              <button class="m-refresh-btn" @click="refreshVideo">换一个</button>
-            </div>
+  <Teleport to="body">
+    <Transition name="fade">
+      <div 
+        v-if="visible" 
+        class="media-mask" 
+        @click.self="closeModal"
+        @touchstart="handleTouchStart"
+        @touchend="handleTouchEnd"
+      >
+        <div class="media-container">
+          <div class="media-header">
+            <span>影音中心 (向上滑动切换)</span>
+            <close-one class="close-icon" @click="closeModal" />
+          </div>
+          <div class="media-body">
+            <video 
+              ref="videoPlayer"
+              class="video-content" 
+              controls 
+              autoplay
+              muted
+              playsinline
+              :src="videoUrl"
+              @ended="refreshVideo"
+              @error="handleError"
+            ></video>
+            <div class="tips">向上滑动切换视频</div>
           </div>
         </div>
-      </Transition>
-    </Teleport>
-  </div>
+      </div>
+    </Transition>
+  </Teleport>
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount } from 'vue';
-import { VideoTwo, CloseOne } from "@icon-park/vue-next";
+import { ref, watch, nextTick } from 'vue';
+import { CloseOne } from "@icon-park/vue-next";
 
-const isMobile = ref(false);
-const showModal = ref(false);
+const props = defineProps({ visible: Boolean });
+const emit = defineEmits(['update:visible']);
+
+const videoPlayer = ref(null);
 const videoUrl = ref("");
 const apiUrl = "https://api.yujn.cn/api/zzxjj.php?type=video";
 
-const checkMobile = () => {
-  isMobile.value = window.innerWidth <= 721;
+// 触摸逻辑
+const touchStartY = ref(0);
+
+const handleTouchStart = (e) => {
+  touchStartY.value = e.touches[0].clientY;
+};
+
+const handleTouchEnd = (e) => {
+  const touchEndY = e.changedTouches[0].clientY;
+  // 向上滑动距离超过 50 像素则切换
+  if (touchStartY.value - touchEndY > 50) {
+    refreshVideo();
+  }
 };
 
 const refreshVideo = () => {
-  videoUrl.value = `${apiUrl}&t=${Date.now()}`;
+  videoUrl.value = ""; 
+  nextTick(() => {
+    videoUrl.value = `${apiUrl}&t=${Date.now()}`;
+    // 尝试播放
+    setTimeout(() => {
+      if (videoPlayer.value) {
+        videoPlayer.value.muted = false; // 尝试取消静音
+        videoPlayer.value.play().catch(() => {
+          console.log("静音自动播放已启动");
+        });
+      }
+    }, 100);
+  });
 };
+
+const handleError = () => { refreshVideo(); };
 
 const closeModal = () => {
-  showModal.value = false;
   videoUrl.value = "";
+  emit('update:visible', false);
 };
 
-watch(showModal, (val) => {
+watch(() => props.visible, (val) => {
   if (val) refreshVideo();
-});
-
-onMounted(() => {
-  checkMobile();
-  window.addEventListener('resize', checkMobile);
-});
-
-onBeforeUnmount(() => {
-  window.removeEventListener('resize', checkMobile);
 });
 </script>
 
 <style lang="scss" scoped>
-.m-media-btn {
-  position: fixed;
-  bottom: 120px; /* 放在菜单按钮上方，避免重叠 */
-  right: 20px;
-  z-index: 999;
-  width: 60px;
-  height: 60px;
-  background: rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(10px);
-  border-radius: 50%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-  .text { color: #fff; font-size: 9px; margin-top: 2px; }
-}
-
-.m-modal-mask {
+.media-mask {
   position: fixed;
   top: 0; left: 0; width: 100vw; height: 100vh;
   background: #000;
-  z-index: 2000;
+  z-index: 99999;
+  display: flex; align-items: center; justify-content: center;
+}
+.media-container {
+  width: 100%; height: 100%;
   display: flex; flex-direction: column;
 }
-
-.m-modal-container {
-  height: 100%; display: flex; flex-direction: column;
-  .m-header {
-    padding: 15px; display: flex; justify-content: space-between;
-    background: #111; color: #eee;
-    .m-close { font-size: 24px; }
-  }
-  .m-content {
-    flex: 1; position: relative; background: #000;
-    display: flex; align-items: center; justify-content: center;
-    .m-video { width: 100%; height: 100%; object-fit: contain; }
-    .m-refresh-btn {
-      position: absolute; bottom: 30px;
-      padding: 10px 30px; background: #3498db; color: white;
-      border: none; border-radius: 20px; font-size: 14px;
-    }
+.media-header {
+  padding: 15px; display: flex; justify-content: space-between;
+  background: rgba(255,255,255,0.1); color: #fff; font-size: 14px;
+  .close-icon { cursor: pointer; font-size: 20px; }
+}
+.media-body {
+  flex: 1; position: relative; background: #000;
+  display: flex; align-items: center; justify-content: center;
+  .video-content { width: 100%; height: 100%; object-fit: contain; }
+  .tips {
+    position: absolute; bottom: 20px; color: rgba(255,255,255,0.4);
+    font-size: 12px; pointer-events: none;
   }
 }
-
-.m-fade-enter-active, .m-fade-leave-active { transition: all 0.4s ease; }
-.m-fade-enter-from, .m-fade-leave-to { opacity: 0; transform: translateY(100px); }
+.fade-enter-active, .fade-leave-active { transition: opacity 0.3s; }
+.fade-enter-from, .fade-leave-to { opacity: 0; }
 </style>
