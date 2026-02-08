@@ -52,8 +52,7 @@ import {
   Fire, 
   LaptopCode,
   Tv as LiveTvFilled, // 将 Fa 中的 Tv 映射为 LiveTvFilled
-  Telegram,
-  MusicNote124Filled // <--- 依照要求添加
+  Telegram 
 } from "@vicons/fa";
 import { mainStore } from "@/store";
 import { Swiper, SwiperSlide } from "swiper/vue";
@@ -83,14 +82,12 @@ const siteIcon = {
   Book,
   Fire,
   LaptopCode,
-  Telegram,
-  MusicNote124Filled // <--- 依照要求添加映射
+  Telegram
 };
 
 // 链接跳转逻辑
 const jumpLink = (data) => {
-  // 修改为匹配你 JSON 中的名称 "Cyber DJ"
-  if (data.name === "Cyber DJ" && store.musicClick) {
+  if (data.name === "音乐" && store.musicClick) {
     if (typeof $openList === "function") $openList();
   } else {
     window.open(data.link, "_blank");
