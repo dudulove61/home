@@ -4,7 +4,7 @@
       <div v-if="visible" class="media-mask" @click.self="closeModal">
         <div class="media-container" @wheel.prevent="handleWheel">
           <div class="media-header">
-            <span>影音中心</span>
+            <span> </span>
             <close-one class="close-icon" @click="closeModal" />
           </div>
           <div class="media-body">
@@ -99,3 +99,4 @@ watch(() => props.visible, (val) => {
 .fade-enter-active, .fade-leave-active { transition: opacity 0.3s; }
 .fade-enter-from, .fade-leave-to { opacity: 0; }
 </style>
+
