@@ -2,17 +2,17 @@
   <Loading />
   <Background @loadComplete="loadComplete" />
   
-  <div 
-    class="mobile-media-btn" 
-    v-show="!showMediaModal && !store.backgroundShow" 
-    @click="showMediaModal = true"
-  >
-    <VideoTwo theme="filled" size="24" fill="#ffffff" />
-    <span class="text">影音中心</span>
-  </div>
-
   <Transition name="fade" mode="out-in">
     <main id="main" v-if="store.imgLoadStatus">
+      <div 
+        class="mobile-media-btn" 
+        v-show="!showMediaModal && !store.backgroundShow" 
+        @click="showMediaModal = true"
+      >
+        <video-two theme="filled" size="24" fill="#ffffff" />
+        <span class="text">影音中心</span>
+      </div>
+
       <div class="container" v-show="!store.backgroundShow">
         <section class="all" v-show="!store.setOpenState">
           <MainLeft />
@@ -63,56 +63,24 @@ import config from "@/../package.json";
 const store = mainStore();
 const showMediaModal = ref(false);
 
-// 获取窗口宽度
-const getWidth = () => {
-  store.setInnerWidth(window.innerWidth);
-};
+const getWidth = () => { store.setInnerWidth(window.innerWidth); };
+const loadComplete = () => { nextTick(() => { helloInit(); checkDays(); }); };
 
-// 资源加载完成
-const loadComplete = () => {
-  nextTick(() => {
-    helloInit();
-    checkDays();
-  });
-};
-
-// 监听宽度变化
-watch(
-  () => store.innerWidth,
-  (value) => {
-    if (value < 721) {
-      store.boxOpenState = false;
-      store.setOpenState = false;
-    }
-  },
-);
+watch(() => store.innerWidth, (value) => {
+  if (value < 721) {
+    store.boxOpenState = false;
+    store.setOpenState = false;
+  }
+});
 
 onMounted(() => {
   cursorInit();
-  
-  // 屏蔽右键
-  document.oncontextmenu = () => {
-    ElMessage({
-      message: "为了浏览体验，本站禁用右键",
-      grouping: true,
-      duration: 2000,
-    });
-    return false;
-  };
-
-  // 监听尺寸
   getWidth();
   window.addEventListener("resize", getWidth);
-
-  // 控制台字符画
-  const title1 = "無名の主页";
-  const title2 = `
- █████  ██   ██ ███████ 
-██   ██ ██  ██  ██      
-███████ █████   █████   
-██   ██ ██  ██  ██      
-██   ██ ██   ██ ███████`;
-  console.info(`%c${title1} %c${title2}`, "font-size: 20px;color: #f4a759;", "font-size: 12px;color: #f4a759;");
+  document.oncontextmenu = () => {
+    ElMessage({ message: "为了浏览体验，本站禁用右键", grouping: true, duration: 2000 });
+    return false;
+  };
 });
 
 onBeforeUnmount(() => {
@@ -121,6 +89,7 @@ onBeforeUnmount(() => {
 </script>
 
 <style lang="scss" scoped>
+/* 移动端入口按钮 - 严格限制在 721px 以下 */
 .mobile-media-btn {
   display: none;
   @media (max-width: 721px) {
@@ -128,7 +97,7 @@ onBeforeUnmount(() => {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    position: fixed;
+    position: fixed; /* 悬浮定位 */
     top: 20px;
     left: 20px;
     z-index: 100;
@@ -137,58 +106,35 @@ onBeforeUnmount(() => {
     backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 12px;
-    cursor: pointer;
-    transition: transform 0.2s, background 0.2s;
-    
-    .text {
-      color: #fff;
-      font-size: 10px;
-      margin-top: 4px;
-      opacity: 0.9;
-    }
-    
-    &:active {
-      transform: scale(0.95);
-      background: rgba(0, 0, 0, 0.4);
-    }
+    .text { color: #fff; font-size: 10px; margin-top: 4px; }
+    &:active { transform: scale(0.95); }
   }
 }
 
 #main {
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  top: 0; left: 0; width: 100%; height: 100%;
   transform: scale(1.2);
   transition: transform 0.3s;
   animation: fade-blur-main-in 0.65s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
   animation-delay: 0.5s;
-  
   .container {
-    width: 100%;
-    height: 100vh;
+    width: 100%; height: 100vh;
+    margin: 0 auto; padding: 0 0.5vw;
     .all {
-      width: 100%;
-      height: 100%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
+      width: 100%; height: 100%;
+      padding: 0 0.75rem;
+      display: flex; flex-direction: row;
+      justify-content: center; align-items: center;
+    }
+    .more {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background-color: #00000080; backdrop-filter: blur(20px);
+      z-index: 2; animation: fade 0.5s;
     }
   }
-
   .menu {
-    position: absolute;
-    top: 84%;
-    left: calc(50% - 28px);
-    width: 56px;
-    height: 34px;
-    background: rgb(0 0 0 / 20%);
-    backdrop-filter: blur(10px);
-    border-radius: 6px;
-    @media (min-width: 721px) {
-      display: none;
-    }
-  }
-}
-</style>
+    position: absolute; display: flex; justify-content: center; align-items: center;
+    top: 84%; left: calc(50% - 28px); width: 56px; height: 34px;
+    background: rgb(0 0 0 / 20%); backdrop-filter: blur(10px); border-radius: 6px;
+    @media (min-width: 721px) { display: none;
