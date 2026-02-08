@@ -2,17 +2,17 @@
   <Loading />
   <Background @loadComplete="loadComplete" />
 
-  <div
-    v-if="store.innerWidth <= 721"
-    class="mobile-media-entrance"
-    v-show="!showMediaModal && !store.backgroundShow"
-    @click="showMediaModal = true"
-  >
-    <video-two theme="filled" size="24" fill="#ffffff" />
-    <span class="text">影音中心</span>
-  </div>
-
-  <MediaModal v-model:visible="showMediaModal" />
+  <template v-if="store.innerWidth <= 721">
+    <div
+      class="mobile-media-entrance"
+      v-show="!showMediaModal && !store.backgroundShow"
+      @click="showMediaModal = true"
+    >
+      <video-two theme="filled" size="24" fill="#ffffff" />
+      <span class="text">影音中心</span>
+    </div>
+    <MediaModal v-model:visible="showMediaModal" />
+  </template>
 
   <Transition name="fade" mode="out-in">
     <main id="main" v-if="store.imgLoadStatus">
@@ -64,12 +64,12 @@ import config from "@/../package.json";
 const store = mainStore();
 const showMediaModal = ref(false);
 
-// 页面宽度
+// 页面宽度检测逻辑
 const getWidth = () => {
   store.setInnerWidth(window.innerWidth);
 };
 
-// 加载完成事件
+// 资源加载完成后的初始化
 const loadComplete = () => {
   nextTick(() => {
     helloInit();
@@ -77,7 +77,7 @@ const loadComplete = () => {
   });
 };
 
-// 监听宽度变化
+// 响应式监听宽度，处理移动端 UI 切换
 watch(
   () => store.innerWidth,
   (value) => {
@@ -85,13 +85,14 @@ watch(
       store.boxOpenState = false;
       store.setOpenState = false;
     }
-  },
+  }
 );
 
 onMounted(() => {
+  // 1. 初始化自定义鼠标
   cursorInit();
 
-  // 屏蔽右键
+  // 2. 屏蔽右键（提升沉浸感）
   document.oncontextmenu = () => {
     ElMessage({
       message: "为了浏览体验，本站禁用右键",
@@ -101,7 +102,7 @@ onMounted(() => {
     return false;
   };
 
-  // 鼠标中键事件
+  // 3. 鼠标中键开启壁纸模式
   window.addEventListener("mousedown", (event) => {
     if (event.button == 1) {
       store.backgroundShow = !store.backgroundShow;
@@ -112,23 +113,14 @@ onMounted(() => {
     }
   });
 
+  // 4. 监听视口变化
   getWidth();
   window.addEventListener("resize", getWidth);
 
-  // 控制台输出
+  // 5. 控制台彩蛋输出
   const styleTitle1 = "font-size: 20px;font-weight: 600;color: rgb(244,167,89);";
-  const styleTitle2 = "font-size:12px;color: rgb(244,167,89);";
-  const styleContent = "color: rgb(30,152,255);";
   const title1 = "無名の主页";
-  const title2 = `
- _____ __  __  _______     ____     __
-|_   _|  \\/  |/ ____\\ \\   / /\\ \\   / /
-  | | | \\  / | (___  \\ \\_/ /  \\ \\_/ /
-  | | | |\\/| |\\___ \\  \\   /    \\   /
- _| |_| |  | |____) |  | |      | |
-|_____|_|  |_|_____/   |_|      |_|`;
-  const content = `\n\n版本: ${config.version}\n主页: ${config.home}\nGithub: ${config.github}`;
-  console.info(`%c${title1} %c${title2} %c${content}`, styleTitle1, styleTitle2, styleContent);
+  console.info(`%c${title1}`, styleTitle1);
 });
 
 onBeforeUnmount(() => {
@@ -137,36 +129,41 @@ onBeforeUnmount(() => {
 </script>
 
 <style lang="scss" scoped>
-/* 移动端专属入口按钮样式 - 绝对不影响 PC 布局 */
+/* 移动端影音中心按钮样式 
+  采用 fixed 定位，完全脱离文档流，
+  不会对 PC 端的 #main 或 .container 产生任何挤压
+*/
 .mobile-media-entrance {
   position: fixed;
-  top: 25px;
+  top: 20px;
   left: 20px;
-  z-index: 1000; /* 确保在最上层 */
+  z-index: 9999; 
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 8px 12px;
-  background: rgba(0, 0, 0, 0.4);
+  padding: 8px 10px;
+  background: rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 12px;
   cursor: pointer;
-  transition: transform 0.2s;
+  transition: transform 0.2s, background 0.2s;
 
   .text {
     color: #fff;
     font-size: 10px;
     margin-top: 4px;
-    font-weight: bold;
+    font-weight: 500;
   }
 
   &:active {
     transform: scale(0.9);
+    background: rgba(0, 0, 0, 0.7);
   }
 }
 
+/* 原始 PC 端布局样式 - 请勿修改 */
 #main {
   position: absolute;
   top: 0;
@@ -203,9 +200,6 @@ onBeforeUnmount(() => {
       z-index: 2;
       animation: fade 0.5s;
     }
-    @media (max-width: 1200px) {
-      padding: 0 2vw;
-    }
   }
 
   .menu {
@@ -220,52 +214,19 @@ onBeforeUnmount(() => {
     background: rgb(0 0 0 / 20%);
     backdrop-filter: blur(10px);
     border-radius: 6px;
-    transition: transform 0.3s;
-    animation: fade 0.5s;
-    &:active {
-      transform: scale(0.95);
-    }
-    .i-icon {
-      transform: translateY(2px);
-    }
     @media (min-width: 721px) {
       display: none;
     }
   }
 
-  /* 保持原有的响应式适配 */
+  /* 针对移动端特殊高度的适配 */
   @media (max-height: 720px) {
     overflow-y: auto;
     overflow-x: hidden;
     .container {
       height: 721px;
-      .more {
-        height: 721px;
-        width: calc(100% + 6px);
-      }
-      @media (min-width: 391px) {
-        padding-left: 0.7vw;
-        padding-right: 0.25vw;
-        @media (max-width: 1200px) {
-          padding-left: 2.3vw;
-          padding-right: 1.75vw;
-        }
-        @media (max-width: 1100px) {
-          padding-left: 2vw;
-          padding-right: calc(2vw - 6px);
-        }
-        @media (max-width: 992px) {
-          padding-left: 2.3vw;
-          padding-right: 1.7vw;
-        }
-        @media (max-width: 900px) {
-          padding-left: 2vw;
-          padding-right: calc(2vw - 6px);
-        }
-      }
+      .more { height: 721px; width: calc(100% + 6px); }
     }
-    .menu {
-      top: 605.64px;
-      left: 170.5px;
-      @media (min-width: 391px) {
-        left: calc(
+  }
+}
+</style>
