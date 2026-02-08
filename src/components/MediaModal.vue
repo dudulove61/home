@@ -1,16 +1,16 @@
 <template>
   <Teleport to="body">
     <Transition name="fade">
-      <div v-if="visible" class="media-modal-mask" @click.self="closeModal">
-        <div class="media-modal-container" @wheel.prevent="handleWheel">
-          <div class="media-modal-header">
+      <div v-if="visible" class="media-mask" @click.self="closeModal">
+        <div class="media-container" @wheel.prevent="handleWheel">
+          <div class="media-header">
             <span>影音中心</span>
             <close-one class="close-icon" @click="closeModal" />
           </div>
-          <div class="media-modal-body">
+          <div class="media-body">
             <video 
               ref="videoPlayer"
-              class="video-player-content" 
+              class="video-content" 
               controls 
               autoplay
               :src="videoUrl"
@@ -18,8 +18,8 @@
               @click="refreshVideo"
               @error="handleError"
             ></video>
-            <div class="control-btn-group">
-              <el-button type="primary" round @click.stop="refreshVideo">换一个 (点击视频也可切换)</el-button>
+            <div class="btn-group">
+              <el-button type="primary" round @click.stop="refreshVideo">换一个</el-button>
             </div>
           </div>
         </div>
@@ -56,7 +56,6 @@ const handleWheel = (event) => {
 };
 
 const handleError = () => {
-  // 屏蔽频繁报错，自动静默切换
   refreshVideo();
 };
 
@@ -71,82 +70,32 @@ watch(() => props.visible, (val) => {
 </script>
 
 <style lang="scss" scoped>
-/* 蒙版层：强制覆盖全屏，不受父级 transform 影响 */
-.media-modal-mask {
+.media-mask {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
+  top: 0; left: 0; width: 100vw; height: 100vh;
   background: rgba(0, 0, 0, 0.9);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 99999;
-  backdrop-filter: blur(20px);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 99999; backdrop-filter: blur(20px);
 }
-
-.media-modal-container {
-  /* PC端展示样式 */
-  width: 95%;
-  max-width: 400px;
-  height: 80vh;
-  background: #000;
-  border-radius: 20px;
+.media-container {
+  width: 90%; max-width: 400px; height: 80vh;
+  background: #000; border-radius: 20px;
   border: 1px solid rgba(255, 255, 255, 0.1);
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  position: relative;
-
-  /* 移动端全屏逻辑 */
+  overflow: hidden; display: flex; flex-direction: column;
   @media (max-width: 721px) {
-    width: 100vw !important;
-    height: 100vh !important;
-    max-width: none !important;
-    border-radius: 0 !important;
-    border: none !important;
+    width: 100vw; height: 100vh; max-width: none; border-radius: 0;
   }
 }
-
-.media-modal-header {
-  padding: 12px 20px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: rgba(255,255,255,0.05);
-  color: #ccc;
-  font-size: 13px;
-  z-index: 10;
-  .close-icon { cursor: pointer; font-size: 20px; &:hover { color: #ff4d4f; } }
+.media-header {
+  padding: 10px 15px; display: flex; justify-content: space-between;
+  align-items: center; background: #111; color: #888; font-size: 12px;
+  .close-icon { cursor: pointer; &:hover { color: #ff4d4f; } }
 }
-
-.media-modal-body {
-  flex: 1;
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden; /* 防止视频溢出 */
-
-  .video-player-content {
-    width: 100%;
-    height: 100%;
-    /* 核心：确保视频在容器内按比例缩放，不挤出屏幕 */
-    object-fit: contain; 
-    background: #000;
-  }
-
-  .control-btn-group {
-    position: absolute;
-    bottom: 50px;
-    z-index: 11;
-    opacity: 0.7;
-    &:hover { opacity: 1; }
-  }
+.media-body {
+  flex: 1; position: relative; display: flex; align-items: center; justify-content: center;
+  .video-content { width: 100%; height: 100%; object-fit: contain; }
+  .btn-group { position: absolute; bottom: 30px; opacity: 0.6; }
 }
-
 .fade-enter-active, .fade-leave-active { transition: opacity 0.3s; }
 .fade-enter-from, .fade-leave-to { opacity: 0; }
 </style>
