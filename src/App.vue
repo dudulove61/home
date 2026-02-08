@@ -67,17 +67,15 @@ const showMediaModal = ref(false);
 const getWidth = () => { store.setInnerWidth(window.innerWidth); };
 const loadComplete = () => { nextTick(() => { helloInit(); checkDays(); }); };
 
-watch(() => store.innerWidth, (val) => {
-  if (val < 721) { store.boxOpenState = false; store.setOpenState = false; }
-});
-
 onMounted(() => {
   cursorInit();
   getWidth();
   window.addEventListener("resize", getWidth);
 });
 
-onBeforeUnmount(() => { window.removeEventListener("resize", getWidth); });
+onBeforeUnmount(() => {
+  window.removeEventListener("resize", getWidth);
+});
 </script>
 
 <style lang="scss" scoped>
@@ -96,10 +94,14 @@ onBeforeUnmount(() => { window.removeEventListener("resize", getWidth); });
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 12px;
   cursor: pointer;
-  animation: fade 0.5s ease-in; /* 增加淡入动画 */
+  animation: fade-in 0.6s ease-out forwards;
 
   .text { color: #fff; font-size: 10px; margin-top: 4px; font-weight: bold; }
-  &:active { transform: scale(0.9); }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 #main {
@@ -109,13 +111,5 @@ onBeforeUnmount(() => { window.removeEventListener("resize", getWidth); });
   transition: transform 0.3s;
   animation: fade-blur-main-in 0.65s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
   animation-delay: 0.5s;
-  
-  .container {
-    width: 100%; height: 100vh;
-    .all { width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; }
-  }
-  .menu {
-    position: absolute; top: 84%; left: calc(50% - 28px);
-    width: 56px; height: 34px; background: rgb(0 0 0 / 20%);
-    backdrop-filter: blur(10px); border-radius: 6px;
-    @media (min-width: 721
+}
+</style>
