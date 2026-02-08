@@ -26,7 +26,7 @@
               @click="jumpLink(item)"
             >
               <Icon size="26">
-                <component :is="siteIcon[item.icon]" />
+                <component :is="siteIcon[item.icon] || Link" />
               </Icon>
               <span class="name text-hidden">{{ item.name }}</span>
             </div>
@@ -41,7 +41,7 @@
 <script setup>
 import { computed, onMounted } from "vue";
 import { Icon } from "@vicons/utils";
-// 从 Font Awesome 类别中引入
+// 引入图标
 import { 
   Link, 
   Blog, 
@@ -51,13 +51,18 @@ import {
   Book, 
   Fire, 
   LaptopCode,
-  Tv as LiveTvFilled, // 将 Fa 中的 Tv 映射为 LiveTvFilled
-  Telegram 
+  Tv as LiveTvFilled, 
+  Telegram,
+  MusicNote124Filled // 按照要求加入
 } from "@vicons/fa";
 import { mainStore } from "@/store";
 import { Swiper, SwiperSlide } from "swiper/vue";
 import { Pagination, Mousewheel } from "swiper/modules";
 import siteLinks from "@/assets/siteLinks.json";
+
+// 引入 Swiper 样式
+import "swiper/css";
+import "swiper/css/pagination";
 
 const store = mainStore();
 
@@ -82,12 +87,14 @@ const siteIcon = {
   Book,
   Fire,
   LaptopCode,
-  Telegram
+  Telegram,
+  MusicNote124Filled // 映射加入
 };
 
 // 链接跳转逻辑
 const jumpLink = (data) => {
-  if (data.name === "音乐" && store.musicClick) {
+  // 同步判断 JSON 中的 "Cyber DJ"
+  if (data.name === "Cyber DJ" && store.musicClick) {
     if (typeof $openList === "function") $openList();
   } else {
     window.open(data.link, "_blank");
