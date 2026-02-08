@@ -43,8 +43,48 @@
   </Transition>
 </template>
 
+<script setup>
+import { ref, watch, onMounted, onBeforeUnmount, nextTick } from "vue";
+import { helloInit, checkDays } from "@/utils/getTime.js";
+import { HamburgerButton, CloseSmall, VideoTwo } from "@icon-park/vue-next";
+import { mainStore } from "@/store";
+import { Icon } from "@vicons/utils";
+import { ElMessage } from "element-plus";
+import Loading from "@/components/Loading.vue";
+import MainLeft from "@/views/Main/Left.vue";
+import MainRight from "@/views/Main/Right.vue";
+import Background from "@/components/Background.vue";
+import Footer from "@/components/Footer.vue";
+import Box from "@/views/Box/index.vue";
+import MoreSet from "@/views/MoreSet/index.vue";
+import MediaModal from "@/components/MediaModal.vue";
+import cursorInit from "@/utils/cursor.js";
+
+const store = mainStore();
+const showMediaModal = ref(false);
+
+const getWidth = () => { store.setInnerWidth(window.innerWidth); };
+const loadComplete = () => { nextTick(() => { helloInit(); checkDays(); }); };
+
+watch(() => store.innerWidth, (value) => {
+  if (value < 721) {
+    store.boxOpenState = false;
+    store.setOpenState = false;
+  }
+});
+
+onMounted(() => {
+  cursorInit();
+  getWidth();
+  window.addEventListener("resize", getWidth);
+});
+
+onBeforeUnmount(() => {
+  window.removeEventListener("resize", getWidth);
+});
+</script>
+
 <style lang="scss" scoped>
-/* 严格限制移动端按钮样式，物理隔离 PC 端 */
 .mobile-media-btn {
   display: none; 
   @media (max-width: 721px) {
@@ -67,8 +107,25 @@
 #main {
   position: absolute;
   top: 0; left: 0; width: 100%; height: 100%;
-  transform: scale(1.2); /* 之前的弹窗错位就是因为它 */
+  transform: scale(1.2);
   transition: transform 0.3s;
-  /* ... 其他原有样式保持不变 ... */
+  
+  .container {
+    width: 100%; height: 100vh;
+    .all {
+      width: 100%; height: 100%;
+      display: flex; justify-content: center; align-items: center;
+    }
+  }
+
+  .menu {
+    position: absolute;
+    top: 84%; left: calc(50% - 28px);
+    width: 56px; height: 34px;
+    background: rgb(0 0 0 / 20%);
+    backdrop-filter: blur(10px);
+    border-radius: 6px;
+    @media (min-width: 721px) { display: none; }
+  }
 }
 </style>
