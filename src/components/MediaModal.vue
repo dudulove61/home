@@ -3,9 +3,10 @@
     <div v-if="visible" class="modal-mask" @click.self="closeModal">
       <div class="modal-container" @wheel.prevent="handleWheel">
         <div class="modal-header">
-          <span>美女小姐姐 (当前状态: {{ scrollHint }})</span>
+          <span>美女小姐姐 (滚动或点击视频切换)</span>
           <close-one class="close-icon" @click="closeModal" />
         </div>
+        
         <div class="modal-body">
           <video 
             ref="videoPlayer"
@@ -14,14 +15,14 @@
             autoplay
             :src="videoUrl"
             @ended="refreshVideo"
+            @click="refreshVideo"
             @error="handleError"
           ></video>
           
           <div class="btn-group">
-            <el-button type="primary" round @click="refreshVideo">换一个 (滚轮下划)</el-button>
+            <el-button type="primary" round @click.stop="refreshVideo">换一个</el-button>
           </div>
-          
-          <div class="tips">提示：PC端鼠标向下滚动可切换下一个</div>
+          <div class="tips">PC滚轮切换 | 移动端点击视频切换</div>
         </div>
       </div>
     </div>
@@ -29,7 +30,7 @@
 </template>
 
 <script setup>
-import { ref, watch, onBeforeUnmount } from 'vue';
+import { ref, watch } from 'vue';
 import { CloseOne } from "@icon-park/vue-next";
 import { ElMessage } from "element-plus";
 
@@ -40,56 +41,48 @@ const props = defineProps({
 const emit = defineEmits(['update:visible']);
 
 const videoUrl = ref("");
-const scrollHint = ref("已就绪");
-const isThrottled = ref(false); // 节流阀，防止滚轮太快导致连续请求
-
-// 接口地址
+const isThrottled = ref(false); // 节流开关
 const apiUrl = "https://api.yujn.cn/api/zzxjj.php?type=video";
 
-// 切换视频逻辑
+// 切换视频
 const refreshVideo = () => {
-  videoUrl.value = ""; // 先清空，触发视频重载
+  videoUrl.value = ""; 
+  // 延迟加载确保 DOM 刷新
   setTimeout(() => {
     videoUrl.value = `${apiUrl}&t=${new Date().getTime()}`;
-    scrollHint.value = "正在加载...";
   }, 50);
 };
 
-// 鼠标滚轮处理
+// 处理 PC 滚轮
 const handleWheel = (event) => {
-  // event.deltaY > 0 表示向下滚动
   if (event.deltaY > 0 && !isThrottled.value) {
     isThrottled.value = true;
-    scrollHint.value = "切换中...";
     refreshVideo();
-    
-    // 1.5秒节流，防止滚轮划一下触发十几次请求
+    // 1.5秒后再允许滚轮切换，防止刷接口
     setTimeout(() => {
       isThrottled.value = false;
-      scrollHint.value = "已就绪";
     }, 1500);
   }
 };
 
-// 错误处理
+// 报错处理
 const handleError = () => {
-  ElMessage.error("视频加载失败，正在尝试下一个");
+  ElMessage.error("当前视频源失效，正在自动切换");
   refreshVideo();
 };
 
-// 关闭窗口
+// 关闭逻辑
 const closeModal = () => {
   videoUrl.value = "";
   emit('update:visible', false);
 };
 
-// 监听打开状态
+// 监听显示状态
 watch(() => props.visible, (val) => {
   if (val) {
     refreshVideo();
   }
 });
-
 </script>
 
 <style lang="scss" scoped>
@@ -99,68 +92,28 @@ watch(() => props.visible, (val) => {
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.85);
+  background: rgba(0, 0, 0, 0.9);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(15px);
 }
 
 .modal-container {
   width: 95%;
-  max-width: 500px; // 既然是短视频 API，竖屏容器更合适
+  max-width: 500px;
+  height: 85vh;
   background: #000;
   border-radius: 20px;
   border: 1px solid rgba(255, 255, 255, 0.1);
   overflow: hidden;
-  box-shadow: 0 0 30px rgba(0,0,0,0.5);
-}
-
-.modal-header {
-  padding: 12px 20px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  color: #ccc;
-  font-size: 13px;
-  background: rgba(255,255,255,0.05);
-  .close-icon {
-    cursor: pointer;
-    font-size: 20px;
-    &:hover { color: #ff4d4f; }
-  }
-}
-
-.modal-body {
-  padding: 10px;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  
-  .video-content {
-    width: 100%;
-    height: 70vh; // 竖屏比例
-    border-radius: 12px;
-    object-fit: contain; // 保证视频比例正确
-  }
+  position: relative;
 
-  .btn-group {
-    margin: 15px 0;
-  }
-
-  .tips {
-    font-size: 12px;
-    color: #666;
-    margin-bottom: 10px;
-  }
-}
-
-.fade-enter-active, .fade-leave-active {
-  transition: all 0.3s ease;
-}
-.fade-enter-from, .fade-leave-to {
-  opacity: 0;
-  transform: scale(0.9);
-}
-</style>
+  /* 移动端满屏逻辑 */
+  @media (max-width: 721px) {
+    width: 100vw;
+    height: 100vh;
+    max-width
