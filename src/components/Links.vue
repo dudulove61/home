@@ -41,7 +41,7 @@
 <script setup>
 import { computed, onMounted } from "vue";
 import { Icon } from "@vicons/utils";
-// 引入图标
+// 引入 Font Awesome 图标库中存在的图标
 import { 
   Link, 
   Blog, 
@@ -52,15 +52,14 @@ import {
   Fire, 
   LaptopCode,
   Tv as LiveTvFilled, 
-  Telegram,
-  MusicNote124Filled // 按照要求加入
+  Telegram
 } from "@vicons/fa";
 import { mainStore } from "@/store";
 import { Swiper, SwiperSlide } from "swiper/vue";
 import { Pagination, Mousewheel } from "swiper/modules";
 import siteLinks from "@/assets/siteLinks.json";
 
-// 引入 Swiper 样式
+// 必须引入 Swiper 样式才能正常显示
 import "swiper/css";
 import "swiper/css/pagination";
 
@@ -71,140 +70,4 @@ const siteLinksList = computed(() => {
   const result = [];
   if (!siteLinks) return result;
   for (let i = 0; i < siteLinks.length; i += 6) {
-    const subArr = siteLinks.slice(i, i + 6);
-    result.push(subArr);
-  }
-  return result;
-});
-
-// 网站链接图标映射（需与 JSON 中的 icon 字段对应）
-const siteIcon = {
-  Blog,
-  Cloud,
-  LiveTvFilled,
-  CompactDisc,
-  Compass,
-  Book,
-  Fire,
-  LaptopCode,
-  Telegram,
-  MusicNote124Filled // 映射加入
-};
-
-// 链接跳转逻辑
-const jumpLink = (data) => {
-  // 同步判断 JSON 中的 "Cyber DJ"
-  if (data.name === "Cyber DJ" && store.musicClick) {
-    if (typeof $openList === "function") $openList();
-  } else {
-    window.open(data.link, "_blank");
-  }
-};
-
-onMounted(() => {
-  console.log("站点链接已加载:", siteLinks);
-});
-</script>
-
-<style lang="scss" scoped>
-.links {
-  .line {
-    margin: 2rem 0.25rem 1rem;
-    font-size: 1.1rem;
-    display: flex;
-    align-items: center;
-    animation: fade 0.5s;
-    .title {
-      margin-left: 8px;
-      font-size: 1.15rem;
-      text-shadow: 0 0 5px #00000050;
-    }
-  }
-  .swiper {
-    left: -10px;
-    width: calc(100% + 20px);
-    padding: 5px 10px 0;
-    z-index: 0;
-    .swiper-slide {
-      height: 100%;
-    }
-    .swiper-pagination {
-      margin-top: 12px;
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-      justify-content: center;
-      :deep(.swiper-pagination-bullet) {
-        background-color: #fff;
-        width: 20px;
-        height: 4px;
-        margin: 0 4px;
-        border-radius: 4px;
-        opacity: 0.2;
-        transition: opacity 0.3s;
-        &.swiper-pagination-bullet-active {
-          opacity: 1;
-        }
-        &:hover {
-          opacity: 1;
-        }
-      }
-    }
-  }
-  .link-all {
-    height: 220px;
-    .item {
-      height: 100px;
-      width: 100%;
-      display: flex;
-      align-items: center;
-      flex-direction: row;
-      justify-content: center;
-      padding: 0 10px;
-      border-radius: 8px;
-      animation: fade 0.5s;
-      cursor: pointer;
-
-      &:hover {
-        transform: scale(1.02);
-        background: rgb(0 0 0 / 40%);
-        transition: 0.3s;
-      }
-
-      &:active {
-        transform: scale(1);
-      }
-
-      .name {
-        font-size: 1.1rem;
-        margin-left: 8px;
-      }
-      @media (min-width: 720px) and (max-width: 820px) {
-        .name {
-          display: none;
-        }
-      }
-      @media (max-width: 720px) {
-        height: 80px;
-      }
-      @media (max-width: 460px) {
-        flex-direction: column;
-        .name {
-          font-size: 1rem;
-          margin-left: 0;
-          margin-top: 8px;
-        }
-      }
-    }
-    @media (max-width: 720px) {
-      height: 180px;
-    }
-  }
-}
-
-/* 简单的淡入动画 */
-@keyframes fade {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-</style>
+    const
