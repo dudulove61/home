@@ -1,11 +1,21 @@
 <template>
-  <!-- 加载 -->
   <Loading />
-  <!-- 壁纸 -->
   <Background @loadComplete="loadComplete" />
-  <!-- 主界面 -->
+  
+  <MediaModal v-model:visible="showMediaModal" />
+
   <Transition name="fade" mode="out-in">
     <main id="main" v-if="store.imgLoadStatus">
+      
+      <div 
+        class="mobile-media-btn" 
+        v-show="!showMediaModal && !store.backgroundShow" 
+        @click="showMediaModal = true"
+      >
+        <video-two theme="filled" size="24" fill="#ffffff" />
+        <span class="text">影音中心</span>
+      </div>
+
       <div class="container" v-show="!store.backgroundShow">
         <section class="all" v-show="!store.setOpenState">
           <MainLeft />
@@ -16,7 +26,7 @@
           <MoreSet />
         </section>
       </div>
-      <!-- 移动端菜单按钮 -->
+
       <Icon
         class="menu"
         size="24"
@@ -25,7 +35,7 @@
       >
         <component :is="store.mobileOpenState ? CloseSmall : HamburgerButton" />
       </Icon>
-      <!-- 页脚 -->
+
       <Transition name="fade" mode="out-in">
         <Footer class="f-ter" v-show="!store.backgroundShow && !store.setOpenState" />
       </Transition>
@@ -34,10 +44,12 @@
 </template>
 
 <script setup>
+import { ref, watch, onMounted, onBeforeUnmount, nextTick } from "vue";
 import { helloInit, checkDays } from "@/utils/getTime.js";
-import { HamburgerButton, CloseSmall } from "@icon-park/vue-next";
+import { HamburgerButton, CloseSmall, VideoTwo } from "@icon-park/vue-next";
 import { mainStore } from "@/store";
 import { Icon } from "@vicons/utils";
+import { ElMessage } from "element-plus"; // 补齐引用
 import Loading from "@/components/Loading.vue";
 import MainLeft from "@/views/Main/Left.vue";
 import MainRight from "@/views/Main/Right.vue";
@@ -45,10 +57,12 @@ import Background from "@/components/Background.vue";
 import Footer from "@/components/Footer.vue";
 import Box from "@/views/Box/index.vue";
 import MoreSet from "@/views/MoreSet/index.vue";
+import MediaModal from "@/components/MediaModal.vue"; // 补齐引用
 import cursorInit from "@/utils/cursor.js";
 import config from "@/../package.json";
 
 const store = mainStore();
+const showMediaModal = ref(false); // 控制弹窗显隐
 
 // 页面宽度
 const getWidth = () => {
@@ -58,9 +72,7 @@ const getWidth = () => {
 // 加载完成事件
 const loadComplete = () => {
   nextTick(() => {
-    // 欢迎提示
     helloInit();
-    // 默哀模式
     checkDays();
   });
 };
@@ -77,7 +89,6 @@ watch(
 );
 
 onMounted(() => {
-  // 自定义鼠标
   cursorInit();
 
   // 屏蔽右键
@@ -101,7 +112,6 @@ onMounted(() => {
     }
   });
 
-  // 监听当前页面宽度
   getWidth();
   window.addEventListener("resize", getWidth);
 
@@ -127,6 +137,26 @@ onBeforeUnmount(() => {
 </script>
 
 <style lang="scss" scoped>
+/* 影音中心按钮样式 (物理隔离PC端) */
+.mobile-media-btn {
+  display: none;
+  @media (max-width: 721px) {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 100;
+    padding: 8px;
+    background: rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    .text { color: #fff; font-size: 10px; margin-top: 4px; }
+  }
+}
+
 #main {
   position: absolute;
   top: 0;
@@ -190,6 +220,7 @@ onBeforeUnmount(() => {
       display: none;
     }
   }
+  /* 以下保持你原本的 CSS 逻辑完全不变 */
   @media (max-height: 720px) {
     overflow-y: auto;
     overflow-x: hidden;
@@ -200,36 +231,35 @@ onBeforeUnmount(() => {
         width: calc(100% + 6px);
       }
       @media (min-width: 391px) {
-        // w 1201px ~ max
         padding-left: 0.7vw;
         padding-right: 0.25vw;
-        @media (max-width: 1200px) { // w 1101px ~ 1280px
+        @media (max-width: 1200px) {
           padding-left: 2.3vw;
           padding-right: 1.75vw;
         }
-        @media (max-width: 1100px) { // w 993px ~ 1100px
+        @media (max-width: 1100px) {
           padding-left: 2vw;
           padding-right: calc(2vw - 6px);
         }
-        @media (max-width: 992px) { // w 901px ~ 992px
+        @media (max-width: 992px) {
           padding-left: 2.3vw;
           padding-right: 1.7vw;
         }
-        @media (max-width: 900px) { // w 391px ~ 900px
+        @media (max-width: 900px) {
           padding-left: 2vw;
           padding-right: calc(2vw - 6px);
         }
       }
     }
     .menu {
-      top: 605.64px; // 721px * 0.84
-      left: 170.5px; // 391 * 0.5 - 25px
+      top: 605.64px;
+      left: 170.5px;
       @media (min-width: 391px) {
         left: calc(50% - 25px);
       }
     }
     .f-ter {
-      top: 675px; // 721px - 46px
+      top: 675px;
       @media (min-width: 391px) {
         padding-left: 6px;
       }
@@ -241,7 +271,7 @@ onBeforeUnmount(() => {
       width: 391px;
     }
     .menu {
-      left: 167.5px; // 391px * 0.5 - 28px
+      left: 167.5px;
     }
     .f-ter {
       width: 391px;
